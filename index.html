@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CASHLETICS</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="CASHLETICS">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#13202C">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="manifest" href="manifest.webmanifest">
+<style>
+  /* ===== Paste your Client Portal link (ends in /exec) into PORTAL_URL below ===== */
+  :root{--navy:#13202C;--surface:#FFFFFF}
+  @media (prefers-color-scheme: dark){:root{--surface:#16202A}}
+  html,body{margin:0;height:100%;background:var(--navy);overflow:hidden}
+  body{display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px)}
+  #app{flex:1;width:100%;border:0;display:block;background:var(--surface)}
+  #foot{height:env(safe-area-inset-bottom,0px);background:var(--surface)}
+  #splash{position:fixed;inset:0;display:grid;place-items:center;background:var(--navy);transition:opacity .25s;z-index:2}
+  #splash img{width:96px;height:96px;border-radius:22px}
+  #splash.gone{opacity:0;pointer-events:none}
+  #err{position:fixed;left:16px;right:16px;bottom:calc(24px + env(safe-area-inset-bottom,0px));color:#F2F4F1;font:15px/1.4 -apple-system,system-ui,sans-serif;text-align:center;display:none;z-index:3}
+  #err a{color:#F2F4F1}
+</style>
+</head>
+<body>
+<div id="splash" aria-hidden="true"><img src="icon-180.png" alt=""></div>
+<iframe id="app" title="CASHLETICS" allow="clipboard-write"></iframe>
+<div id="foot"></div>
+<p id="err" role="alert">Taking a while to load. <a id="direct" href="#">Open the portal directly</a></p>
+<script>
+  var PORTAL_URL = 'https://script.google.com/macros/s/AKfycbz7DJRu0jVk8m0cR7NOuaT_ri4D17fwPsX9iUQXtwkxWdk24G8Q5xBF7Oy4WZGxywQ/exec';
+  var f = document.getElementById('app'), sp = document.getElementById('splash');
+  document.getElementById('direct').href = PORTAL_URL;
+  f.addEventListener('load', function () { setTimeout(function () { sp.classList.add('gone'); }, 150); });
+  f.src = PORTAL_URL;
+  setTimeout(function () { if (!sp.classList.contains('gone')) document.getElementById('err').style.display = 'block'; }, 12000);
+</script>
+</body>
+</html>

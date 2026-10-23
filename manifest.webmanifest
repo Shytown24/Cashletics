@@ -1,0 +1,14 @@
+{
+  "name": "CASHLETICS",
+  "short_name": "CASHLETICS",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#13202C",
+  "theme_color": "#13202C",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
