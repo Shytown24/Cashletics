@@ -37,7 +37,7 @@
   var f = document.getElementById('app'), sp = document.getElementById('splash');
   document.getElementById('direct').href = PORTAL_URL;
   f.addEventListener('load', function () { setTimeout(function () { sp.classList.add('gone'); }, 150); });
-  f.src = PORTAL_URL;
+  f.src = PORTAL_URL + (PORTAL_URL.indexOf('?') < 0 ? '?' : '&') + 'embed=1';   // tells the portal this app already handles the notch space
   setTimeout(function () { if (!sp.classList.contains('gone')) document.getElementById('err').style.display = 'block'; }, 12000);
 </script>
 </body>
