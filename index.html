@@ -39,6 +39,19 @@
   f.addEventListener('load', function () { setTimeout(function () { sp.classList.add('gone'); }, 150); });
   f.src = PORTAL_URL + (PORTAL_URL.indexOf('?') < 0 ? '?' : '&') + 'embed=1';   // tells the portal this app already handles the notch space
   setTimeout(function () { if (!sp.classList.contains('gone')) document.getElementById('err').style.display = 'block'; }, 12000);
+
+  // Keeps the portal's sign-in here, because phones wipe what the portal saves inside its Google frame.
+  var TOKEN_KEY = 'cashletics-token';
+  window.addEventListener('message', function (e) {
+    var d = e.data;
+    // only the portal frame inside this page, never another site that opened this one
+    if (!e.source || e.source.top !== window) return;
+    if (!/^https:\/\/[a-z0-9-]+\.googleusercontent\.com$/.test(e.origin) || !d || typeof d !== 'object') return;
+    try {
+      if (d.cashletics === 'getToken') e.source.postMessage({ cashletics: 'token', token: localStorage.getItem(TOKEN_KEY) || '' }, e.origin);
+      else if (d.cashletics === 'token') { if (d.token) localStorage.setItem(TOKEN_KEY, String(d.token)); else localStorage.removeItem(TOKEN_KEY); }
+    } catch (err) {}
+  });
 </script>
 </body>
 </html>
