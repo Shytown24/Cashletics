@@ -20,10 +20,10 @@
   #app{flex:1;width:100%;border:0;display:block;background:var(--bg)}
   #foot{height:env(safe-area-inset-bottom,0px);background:var(--tab)}
   #splash{position:fixed;inset:0;display:grid;place-items:center;background:var(--navy);transition:opacity .25s;z-index:2}
-  .logo{position:relative;width:230px;height:230px;margin:0 auto;perspective:700px;-webkit-mask-image:radial-gradient(circle,#000 52%,transparent 71%);mask-image:radial-gradient(circle,#000 52%,transparent 71%)}
+  .logo{position:relative;width:230px;height:230px;margin:0 auto;perspective:700px}
   .logo img,.logo canvas{position:absolute;left:0;top:0;width:100%;height:100%}
-  .logo canvas{display:none}.logo.on canvas{display:block}
-  .logo canvas.dol{animation:dolspin 3.6s linear infinite}
+  .logo canvas{display:none}.logo.on canvas{display:block}.logo.on img{display:none}
+  .logo canvas.dol{animation:dolspin 3.6s linear infinite;will-change:transform}
   @keyframes dolspin{to{transform:rotateY(360deg)}}
   @media (prefers-reduced-motion:reduce){.logo canvas.dol{animation:none}}
   #splash .logo{width:260px;height:260px}
@@ -63,6 +63,8 @@ function spinLogo(box){
     for(var q=0;q<w*h;q++){var qx=q%w,qy=(q/w)|0;if(qx<2||qy<2||qx>=w-2||qy>=h-2)od.data[q*4+3]=0}
     dol.style.left=x/N*100+'%';dol.style.top=y/N*100+'%';dol.style.width=w/N*100+'%';dol.style.height=h/N*100+'%';
     dc.putImageData(od,0,0);bc.putImageData(d,x,y);
+    /* soft edge baked into the picture (a CSS mask here stops the spin from updating in iPhone Safari) */
+    bc.globalCompositeOperation='destination-in';var gr=bc.createRadialGradient(N/2,N/2,N*.368,N/2,N/2,N*.502);gr.addColorStop(0,'#000');gr.addColorStop(1,'rgba(0,0,0,0)');bc.fillStyle=gr;bc.fillRect(0,0,N,N);bc.globalCompositeOperation='source-over';
     base.className='still';box.appendChild(base);box.appendChild(dol);box.classList.add('on');
   }catch(e){}}
   if(im.complete&&im.naturalWidth)go();else im.onload=go;
