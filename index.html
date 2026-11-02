@@ -20,11 +20,11 @@
   #app{flex:1;width:100%;border:0;display:block;background:var(--bg)}
   #foot{height:env(safe-area-inset-bottom,0px);background:var(--tab)}
   #splash{position:fixed;inset:0;display:grid;place-items:center;background:var(--navy);transition:opacity .25s;z-index:2}
-  .logo{position:relative;width:230px;height:230px;margin:0 auto;perspective:700px;-webkit-perspective:700px}
+  .logo{position:relative;width:230px;height:230px;margin:0 auto;}
   .logo img{position:absolute;left:0;top:0;width:100%;height:100%}
   .logo img.dol{left:32.5352%;top:34.9296%;width:35.493%;height:29.0141%;-webkit-animation:dolspin 3.6s linear infinite;animation:dolspin 3.6s linear infinite;will-change:transform}
-  @-webkit-keyframes dolspin{from{-webkit-transform:rotateY(0deg)}to{-webkit-transform:rotateY(360deg)}}
-  @keyframes dolspin{from{transform:rotateY(0deg)}to{transform:rotateY(360deg)}}
+  @-webkit-keyframes dolspin{0%{-webkit-transform:scaleX(1)}12.5%{-webkit-transform:scaleX(.71)}25%{-webkit-transform:scaleX(0)}37.5%{-webkit-transform:scaleX(-.71)}50%{-webkit-transform:scaleX(-1)}62.5%{-webkit-transform:scaleX(-.71)}75%{-webkit-transform:scaleX(0)}87.5%{-webkit-transform:scaleX(.71)}100%{-webkit-transform:scaleX(1)}}
+  @keyframes dolspin{0%{transform:scaleX(1)}12.5%{transform:scaleX(.71)}25%{transform:scaleX(0)}37.5%{transform:scaleX(-.71)}50%{transform:scaleX(-1)}62.5%{transform:scaleX(-.71)}75%{transform:scaleX(0)}87.5%{transform:scaleX(.71)}100%{transform:scaleX(1)}}
   @media (prefers-reduced-motion:reduce){.logo img.dol{-webkit-animation:none;animation:none}}
   #splash .logo{width:260px;height:260px}
   #splash.gone{opacity:0;pointer-events:none}
