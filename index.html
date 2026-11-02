@@ -8,31 +8,67 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="CASHLETICS">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#13202C">
+<meta name="theme-color" content="#1E2B25">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="manifest" href="manifest.webmanifest">
 <style>
   /* ===== Paste your Client Portal link (ends in /exec) into PORTAL_URL below ===== */
-  :root{--navy:#13202C;--surface:#FFFFFF}
+  :root{--navy:#1E2B25;--surface:#FFFFFF}
   @media (prefers-color-scheme: dark){:root{--surface:#16202A}}
   html,body{margin:0;height:100%;background:var(--navy);overflow:hidden}
   body{display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px)}
   #app{flex:1;width:100%;border:0;display:block;background:var(--surface)}
   #foot{height:env(safe-area-inset-bottom,0px);background:var(--surface)}
   #splash{position:fixed;inset:0;display:grid;place-items:center;background:var(--navy);transition:opacity .25s;z-index:2}
-  #splash img{width:96px;height:96px;border-radius:22px}
+  .logo{position:relative;width:230px;height:230px;margin:0 auto;perspective:700px;-webkit-mask-image:radial-gradient(circle,#000 52%,transparent 71%);mask-image:radial-gradient(circle,#000 52%,transparent 71%)}
+  .logo img,.logo canvas{position:absolute;left:0;top:0;width:100%;height:100%}
+  .logo canvas{display:none}.logo.on canvas{display:block}
+  .logo canvas.dol{animation:dolspin 3.6s linear infinite}
+  @keyframes dolspin{to{transform:rotateY(360deg)}}
+  @media (prefers-reduced-motion:reduce){.logo canvas.dol{animation:none}}
+  #splash .logo{width:260px;height:260px}
   #splash.gone{opacity:0;pointer-events:none}
   #err{position:fixed;left:16px;right:16px;bottom:calc(24px + env(safe-area-inset-bottom,0px));color:#F2F4F1;font:15px/1.4 -apple-system,system-ui,sans-serif;text-align:center;display:none;z-index:3}
   #err a{color:#F2F4F1}
 </style>
 </head>
 <body>
-<div id="splash" aria-hidden="true"><img src="icon-180.png" alt=""></div>
+<div id="splash" aria-hidden="true"><div class="logo" id="slogo"><img src="logo.png" alt=""></div></div>
 <iframe id="app" title="CASHLETICS" allow="clipboard-write"></iframe>
 <div id="foot"></div>
 <p id="err" role="alert">Taking a while to load. <a id="direct" href="#">Open the portal directly</a></p>
 <script>
+/* Splits the green $ out of the logo so it can spin on its own. If anything fails, the plain logo image just stays. */
+function spinLogo(box){
+  if(!box)return;var im=box.querySelector('img');if(!im)return;
+  function go(){try{
+    var N=im.naturalWidth,x=Math.round(.325*N),y=Math.round(.35*N),w=Math.round(.355*N),h=Math.round(.29*N);
+    var base=document.createElement('canvas');base.width=N;base.height=N;var bc=base.getContext('2d');bc.drawImage(im,0,0);
+    var d=bc.getImageData(x,y,w,h),p=d.data,bg=[30,43,37];
+    var dol=document.createElement('canvas');dol.width=w;dol.height=h;dol.className='dol';
+    var dc=dol.getContext('2d'),od=dc.createImageData(w,h),m=new Uint8Array(w*h),k=0;
+    for(var i=0;i<p.length;i+=4,k++){var r=p[i],g=p[i+1],b=p[i+2];
+      if((g>r+8&&g>b+6&&g>45&&(g<140||g>r+30))||(r>110&&g>110&&b<90)){m[k]=1;od.data[i]=r;od.data[i+1]=g;od.data[i+2]=b;od.data[i+3]=255}}
+    /* keep only the $'s own rows: walk out from the middle until a row has no $ pixels, so stray C-edge pixels beyond are dropped */
+    var rc=function(Y){for(var X=0,n=0;X<w;X++)n+=m[Y*w+X];return n},top=h>>1,bot=h>>1;
+    while(top>0&&rc(top-1))top--;while(bot<h-1&&rc(bot+1))bot++;
+    for(var Y=0;Y<h;Y++)if(Y<top||Y>bot)for(var X=0;X<w;X++){m[Y*w+X]=0;od.data[(Y*w+X)*4+3]=0}
+    /* wipe the $ from the still logo, plus a 2px halo of its non-silver edge pixels */
+    for(var yy=0;yy<h;yy++)for(var xx=0;xx<w;xx++){var near=0;
+      for(var dy=-2;dy<=2&&!near;dy++)for(var dx=-2;dx<=2;dx++){var X2=xx+dx,Y2=yy+dy;if(X2>=0&&Y2>=0&&X2<w&&Y2<h&&m[Y2*w+X2]){near=1;break}}
+      if(!near)continue;var j=(yy*w+xx)*4,r2=p[j],g2=p[j+1],b2=p[j+2];
+      if(!m[yy*w+xx]&&Math.abs(r2-g2)<14&&Math.abs(g2-b2)<14&&g2>70)continue;
+      p[j]=bg[0];p[j+1]=bg[1];p[j+2]=bg[2]}
+    /* clear the cut-out's outer 2px so its edge can't show as a hairline */
+    for(var q=0;q<w*h;q++){var qx=q%w,qy=(q/w)|0;if(qx<2||qy<2||qx>=w-2||qy>=h-2)od.data[q*4+3]=0}
+    dol.style.left=x/N*100+'%';dol.style.top=y/N*100+'%';dol.style.width=w/N*100+'%';dol.style.height=h/N*100+'%';
+    dc.putImageData(od,0,0);bc.putImageData(d,x,y);
+    base.className='still';box.appendChild(base);box.appendChild(dol);box.classList.add('on');
+  }catch(e){}}
+  if(im.complete&&im.naturalWidth)go();else im.onload=go;
+}
+  spinLogo(document.getElementById('slogo'));
   var PORTAL_URL = 'https://script.google.com/macros/s/AKfycbz7DJRu0jVk8m0cR7NOuaT_ri4D17fwPsX9iUQXtwkxWdk24G8Q5xBF7Oy4WZGxywQ/exec';
   var f = document.getElementById('app'), sp = document.getElementById('splash');
   document.getElementById('direct').href = PORTAL_URL;
