@@ -31,10 +31,27 @@
   #err{position:fixed;left:16px;right:16px;bottom:calc(24px + env(safe-area-inset-bottom,0px));color:#F2F4F1;font:15px/1.4 -apple-system,system-ui,sans-serif;text-align:center;display:none;z-index:3}
   #err a{color:#F2F4F1}
 </style>
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<script>
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(function (OneSignal) {
+    // the page lives in /Cashletics/, so the worker file and its scope are set there, not at the site root
+    OneSignal.init({ appId: "0109fa4b-0f3f-4071-8485-fede78d2abbf", safari_web_id: "web.onesignal.auto.040fbea3-5bf4-4f81-a6ad-042d48246d00",
+      serviceWorkerPath: "Cashletics/OneSignalSDKWorker.js", serviceWorkerParam: { scope: "/Cashletics/" } });
+  });
+</script>
+<style>
+  #push{display:none;align-items:center;gap:10px;padding:10px 14px;background:var(--tab);color:#F2F4F1;font:14px/1.3 -apple-system,system-ui,sans-serif;border-top:1px solid #2a3a33}
+  #push span{flex:1}
+  #push button{font:inherit;border:0;border-radius:8px;padding:8px 12px;cursor:pointer}
+  #pushGo{background:#F2F4F1;color:#1E2B25;font-weight:600}
+  #pushX{background:none;color:#F2F4F1;opacity:.7;padding:8px}
+</style>
 </head>
 <body>
 <div id="splash" aria-hidden="true"><div class="logo"><img src="logo-base.png?v=4" alt=""><img class="dol" src="logo-dol.png?v=4" alt=""></div></div>
 <iframe id="app" title="CASHLETICS" allow="clipboard-write"></iframe>
+<div id="push"><span>Get workout reminders on this phone?</span><button id="pushGo">Turn on</button><button id="pushX" aria-label="Not now">&#10005;</button></div>
 <div id="foot"></div>
 <p id="err" role="alert">Taking a while to load. <a id="direct" href="#">Open the portal directly</a></p>
 <script>
@@ -55,9 +72,32 @@
     try {
       if (d.cashletics === 'getToken') e.source.postMessage({ cashletics: 'token', token: localStorage.getItem(TOKEN_KEY) || '', bundle: localStorage.getItem(BUNDLE_KEY) || '' }, e.origin);
       else if (d.cashletics === 'bundle') { if (typeof d.json === 'string' && d.json.length < 3000000) localStorage.setItem(BUNDLE_KEY, d.json); }
-      else if (d.cashletics === 'token') { if (d.token) localStorage.setItem(TOKEN_KEY, String(d.token)); else { localStorage.removeItem(TOKEN_KEY); localStorage.removeItem(BUNDLE_KEY); } }
+      else if (d.cashletics === 'token') { if (d.token) localStorage.setItem(TOKEN_KEY, String(d.token)); else { localStorage.removeItem(TOKEN_KEY); localStorage.removeItem(BUNDLE_KEY); } syncPush(); }
     } catch (err) {}
   });
+  // Workout reminders (OneSignal). The sign-in token starts with the ClientID, so the phone is tied to that client.
+  function pushClientId() {
+    try { var t = localStorage.getItem(TOKEN_KEY) || ''; return atob(t.split('.')[0].replace(/-/g, '+').replace(/_/g, '/')).split('|')[0]; } catch (e) { return ''; }
+  }
+  function syncPush() {
+    OneSignalDeferred.push(async function (OS) {
+      var bar = document.getElementById('push'), id = pushClientId();
+      try {
+        if (!id) { await OS.logout(); bar.style.display = 'none'; return; }
+        await OS.login(id);
+        var snoozed = Number(localStorage.getItem('cashletics-push-snooze') || 0) > Date.now();
+        bar.style.display = (OS.Notifications.isPushSupported() && OS.Notifications.permissionNative === 'default' && !snoozed) ? 'flex' : 'none';
+      } catch (e) {}
+    });
+  }
+  document.getElementById('pushGo').onclick = function () {
+    OneSignalDeferred.push(async function (OS) { try { await OS.Notifications.requestPermission(); } catch (e) {} document.getElementById('push').style.display = 'none'; });
+  };
+  document.getElementById('pushX').onclick = function () {
+    try { localStorage.setItem('cashletics-push-snooze', String(Date.now() + 7 * 864e5)); } catch (e) {}
+    document.getElementById('push').style.display = 'none';
+  };
+  syncPush();
 </script>
 </body>
 </html>
