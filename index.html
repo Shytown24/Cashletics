@@ -46,15 +46,16 @@
   setTimeout(function () { if (!sp.classList.contains('gone')) document.getElementById('err').style.display = 'block'; }, 12000);
 
   // Keeps the portal's sign-in here, because phones wipe what the portal saves inside its Google frame.
-  var TOKEN_KEY = 'cashletics-token';
+  var TOKEN_KEY = 'cashletics-token', BUNDLE_KEY = 'cashletics-bundle';   // the last screen too, so the next open shows at once
   window.addEventListener('message', function (e) {
     var d = e.data;
     // only the portal frame inside this page, never another site that opened this one
     if (!e.source || e.source.top !== window) return;
     if (!/^https:\/\/[a-z0-9-]+\.googleusercontent\.com$/.test(e.origin) || !d || typeof d !== 'object') return;
     try {
-      if (d.cashletics === 'getToken') e.source.postMessage({ cashletics: 'token', token: localStorage.getItem(TOKEN_KEY) || '' }, e.origin);
-      else if (d.cashletics === 'token') { if (d.token) localStorage.setItem(TOKEN_KEY, String(d.token)); else localStorage.removeItem(TOKEN_KEY); }
+      if (d.cashletics === 'getToken') e.source.postMessage({ cashletics: 'token', token: localStorage.getItem(TOKEN_KEY) || '', bundle: localStorage.getItem(BUNDLE_KEY) || '' }, e.origin);
+      else if (d.cashletics === 'bundle') { if (typeof d.json === 'string' && d.json.length < 3000000) localStorage.setItem(BUNDLE_KEY, d.json); }
+      else if (d.cashletics === 'token') { if (d.token) localStorage.setItem(TOKEN_KEY, String(d.token)); else { localStorage.removeItem(TOKEN_KEY); localStorage.removeItem(BUNDLE_KEY); } }
     } catch (err) {}
   });
 </script>
