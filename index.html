@@ -87,12 +87,16 @@
         if (!id) { await OS.logout(); bar.style.display = 'none'; return; }
         await OS.login(id);
         var snoozed = Number(localStorage.getItem('cashletics-push-snooze') || 0) > Date.now();
-        bar.style.display = (OS.Notifications.isPushSupported() && OS.Notifications.permissionNative === 'default' && !snoozed) ? 'flex' : 'none';
+        bar.style.display = (OS.Notifications.isPushSupported() && !(OS.Notifications.permission && OS.User.PushSubscription.optedIn) && !snoozed) ? 'flex' : 'none';
       } catch (e) {}
     });
   }
   document.getElementById('pushGo').onclick = function () {
-    OneSignalDeferred.push(async function (OS) { try { await OS.Notifications.requestPermission(); } catch (e) {} document.getElementById('push').style.display = 'none'; });
+    OneSignalDeferred.push(async function (OS) {
+      try { await OS.Notifications.requestPermission(); if (OS.Notifications.permission) await OS.User.PushSubscription.optIn(); } catch (e) {}
+      if (OS.Notifications.permission && OS.User.PushSubscription.optedIn) document.getElementById('push').style.display = 'none';
+      else alert('Notifications are off for this app. On your iPhone open Settings, then Notifications, then CASHLETICS, turn on Allow Notifications, and come back.');   // iOS only asks once; after that the phone's own setting decides
+    });
   };
   document.getElementById('pushX').onclick = function () {
     try { localStorage.setItem('cashletics-push-snooze', String(Date.now() + 7 * 864e5)); } catch (e) {}
