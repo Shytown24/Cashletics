@@ -37,7 +37,8 @@
   OneSignalDeferred.push(function (OneSignal) {
     // the page lives in /Cashletics/, so the worker file and its scope are set there, not at the site root
     OneSignal.init({ appId: "0109fa4b-0f3f-4071-8485-fede78d2abbf", safari_web_id: "web.onesignal.auto.040fbea3-5bf4-4f81-a6ad-042d48246d00",
-      serviceWorkerPath: "Cashletics/OneSignalSDKWorker.js", serviceWorkerParam: { scope: "/Cashletics/" } });
+      serviceWorkerPath: "Cashletics/OneSignalSDKWorker.js", serviceWorkerParam: { scope: "/Cashletics/" },
+      welcomeNotification: { title: "You're all set", message: "Workout reminders from Cash will show up here." } });
   });
 </script>
 <style>
